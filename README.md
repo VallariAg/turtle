@@ -4,5 +4,8 @@ https://codingchallenges.fyi/challenges/challenge-docker/#:~:text=This%20challen
 
 ```
 g++ -o turtle main.cpp
-./turtle run ls
+
+// run one of these:
+./turtle run ls                     // to run on host system
+sudo unshare -u ./turtle run ls     // to run on UTS namespace with "turtle" hostname
 ```

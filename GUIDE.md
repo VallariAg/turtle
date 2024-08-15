@@ -17,5 +17,21 @@ cd os/
 1. Run command line commands from c++: https://linux.die.net/man/3/system
 system call supports only c's strings? why?
 
+2. container hostname with namespaces! 
+    - https://man7.org/linux/man-pages/man7/namespaces.7.html
+    - https://benjamintoll.com/2022/08/08/on-unsharing-namespaces-part-one/
 
+```
+sudo unshare --uts turtle<binary!> 
+
+// cleanup 
+mount | grep "turtle"
+sudo umount /path/to/mount
+
+ps aux | grep "turtle"
+kill -9 <pid>
+```
+
+"lsns" lists all namespaces and it's filled with chrome tabs. 
+Why do broswers put each tab in its own namepace??
 
