@@ -14,12 +14,21 @@ void set_hostname() {
     cout << "new hostname: " + string(hostname) + "\n";
 }
 
+int set_rootdir() {
+    chdir("/tmp/turtle-os");
+    return chroot("/tmp/turtle-os");
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 3) {
         cout << "Too few arguments, no command was passed! Try running `run <cmd>` \n";
-        return 0;
+        return 1;
     }
-
+    int rt = set_rootdir();
+    if (rt != 0) {
+         cout << "failed to setup rootdir with chroot! \n";
+         return 1;
+    }
     set_hostname();
 
     if (string(argv[1]) == "run") {
@@ -30,7 +39,11 @@ int main(int argc, char* argv[]) {
         cout << "running cmd: " + command + "\n";
         
         const char* char_command = command.c_str();
-        system(char_command);
+        int rt = system(char_command);
+        if (rt != 0) {
+            cout << "!!! command failed !!! \n";
+            return 1;
+        }
     }  else {
         cout << "try running `run <cmd>`, nothing else works! :P \n";
     }

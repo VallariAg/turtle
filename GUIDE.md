@@ -46,3 +46,7 @@ kill -9 <pid>
 "lsns" lists all namespaces and it's filled with chrome tabs. 
 Why do broswers put each tab in its own namepace??
 
+#### step 3
+To isolate process -> change container's root fs
+Make the alphine fs as container's root.
+
