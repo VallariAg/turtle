@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <unistd.h>
+#include <cstdlib>
 using namespace std;
 
 void set_hostname() {
@@ -19,6 +20,16 @@ int set_rootdir() {
     return chroot("/tmp/turtle-os");
 }
 
+
+void mount_proc() {
+    system("mount proc /proc -t proc");
+}
+
+void unmount_proc() {
+    cout << "unmount procfs.. \n";
+    system("umount /proc");
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 3) {
         cout << "Too few arguments, no command was passed! Try running `run <cmd>` \n";
@@ -29,6 +40,8 @@ int main(int argc, char* argv[]) {
          cout << "failed to setup rootdir with chroot! \n";
          return 1;
     }
+    mount_proc();
+    atexit(unmount_proc);
     set_hostname();
 
     if (string(argv[1]) == "run") {
