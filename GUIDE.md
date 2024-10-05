@@ -44,6 +44,10 @@ what even is char**? it points to the memory where the memory of char variable i
     - https://man7.org/linux/man-pages/man7/namespaces.7.html
     - https://benjamintoll.com/2022/08/08/on-unsharing-namespaces-part-one/
 
+`unshare` - used to create new namespaces:
+1. command line tool man page: https://man7.org/linux/man-pages/man1/unshare.1.html
+2. system call man page: https://man7.org/linux/man-pages/man2/unshare.2.html
+
 ```
 sudo unshare --uts turtle<binary!> 
 
@@ -64,7 +68,7 @@ What is the difference between a "hostname" and "username"?
 To isolate process (from host fs) -> change container's root fs
 Make the alphine fs as container's root.
 
-### step 4
+#### step 4
 To isolate process (from host process) - container process can't see/interact host processes
 
 Tasks:
@@ -84,4 +88,15 @@ Questions:
 Links:
 - https://www.unix.com/unix-for-beginners-questions-and-answers/280445-linux-containers-proc-mounting-other-queries.html
 - https://www.redhat.com/sysadmin/7-linux-namespaces
+
+#### step 5
+
+Run container rootless. 
+1. create new User namespace (--user) 
+2. set the mappings between the users on the host and container (--map-root-user)
+
+Links:
+- https://man7.org/linux/man-pages/man7/user_namespaces.7.html
+- https://raesene.github.io/blog/2016/02/04/Docker-User-Namespaces/
+
 

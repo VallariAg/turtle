@@ -4,15 +4,19 @@
 #include <cstdlib>
 using namespace std;
 
-void set_hostname() {
+int set_hostname() {
     char hostname[1024];
     gethostname(hostname,1024);
     // cout << "old hostname: " + string(hostname) + "\n";
 
     const char *new_hostname = "turtle";
-    sethostname(new_hostname, 6);
+    int rt = sethostname(new_hostname, 6);
+    if (rt != 0) {
+        return 1;
+    }
     gethostname(hostname,1024);
     cout << "new hostname: " + string(hostname) + "\n";
+    return 0;
 }
 
 int set_rootdir() {
@@ -21,11 +25,31 @@ int set_rootdir() {
 }
 
 
-void mount_proc() {
-    system("mount proc /proc -t proc");
+int mount_proc() {
+    return system("mount proc /proc -t proc");
 }
 
-void unmount_proc() {
+void setup() {
+    int rt = set_rootdir();
+    if (rt != 0) {
+         cout << "failed to setup rootdir with chroot! \n";
+         EXIT_FAILURE;
+    }
+    rt = mount_proc();
+    if (rt != 0) {
+         cout << "failed to mount procfs! \n";
+         EXIT_FAILURE;
+    }
+    rt = set_hostname();
+    if (rt != 0) {
+         cout << "failed to setup hostname! \n";
+         EXIT_FAILURE;
+    }
+}
+
+void teardown() {
+    cout << "\n tearing down... \n";
+    
     cout << "unmount procfs.. \n";
     system("umount /proc");
 }
@@ -35,14 +59,8 @@ int main(int argc, char* argv[]) {
         cout << "Too few arguments, no command was passed! Try running `run <cmd>` \n";
         return 1;
     }
-    int rt = set_rootdir();
-    if (rt != 0) {
-         cout << "failed to setup rootdir with chroot! \n";
-         return 1;
-    }
-    mount_proc();
-    atexit(unmount_proc);
-    set_hostname();
+    setup();
+    atexit(teardown);
 
     if (string(argv[1]) == "run") {
         string command;
