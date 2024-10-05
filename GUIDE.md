@@ -97,6 +97,8 @@ Run container rootless.
 
 Links:
 - https://man7.org/linux/man-pages/man7/user_namespaces.7.html
+- https://man7.org/linux/man-pages/man1/unshare.1.html
 - https://raesene.github.io/blog/2016/02/04/Docker-User-Namespaces/
 
 
+https://man7.org/linux/man-pages/man2/fork.2.html - example at button on how to use it in c++

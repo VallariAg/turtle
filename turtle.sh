@@ -5,5 +5,7 @@ g++ -o turtle main.cpp
 # sudo unshare -u ./turtle /bin/busybox "$@"   
 # sudo unshare -upfm --mount-proc ./turtle "$@" 
 export PATH=$PATH:/bin
-export PS1="\\u@\\h "
-unshare --user --map-root-user -upfm --mount-proc ./turtle "$@" 
+export PS1="\\u@\\h ~ "
+# unshare --user --map-root-user -upfm --mount-proc ./turtle "$@" 
+
+./turtle "$@"
