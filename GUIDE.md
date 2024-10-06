@@ -102,3 +102,29 @@ Links:
 
 
 https://man7.org/linux/man-pages/man2/fork.2.html - example at button on how to use it in c++
+
+#### step 6
+
+control groups! 
+
+- create control group & set limits: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/managing_monitoring_and_updating_the_kernel/assembly_using-cgroupfs-to-manually-manage-cgroups_managing-monitoring-and-updating-the-kernel#proc_creating-cgroups-and-enabling-controllers-in-cgroups-v2-file-system_assembly_using-cgroupfs-to-manually-manage-cgroups
+- start a process in a control group https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/resource_management_guide/starting_a_process#Starting_a_Process
+
+cgroup limits in hierachy:
+
+```
+ls /sys/fs/cgroup             //root control cgroup
+
+mkdir /sys/fs/cgroup/test     // child cgroup
+cat /sys/fs/cgroup/test/cgroup.controllers  // see controllers of "test" cgroup - inherited by /sys/fs/cgroup/cgroup.subtree_control
+
+echo "+cpu +memory" >> /sys/fs/cgroup/test/cgroup.subtree_control      // limit the children of "test" group
+
+
+
+mkdir /sys/fs/cgroup/test/turtle    // child group of "test" cgroup - would only have files for "cpu" and "memory" controllers
+cat /sys/fs/cgroup/test/turtle/cgroup.controllers   //  verify controllers to be only "cpu" and "memory" from /sys/fs/cgroup/test/cgroup.subtree_control
+
+
+```
+
