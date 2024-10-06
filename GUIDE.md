@@ -95,13 +95,45 @@ Run container rootless.
 1. create new User namespace (--user) 
 2. set the mappings between the users on the host and container (--map-root-user)
 
+Basic understanding of how to go rootless:
+- new user namespaces don't need root prividges to be created. (see: https://www.youtube.com/watch?v=YmbCfeVPHEI)
+- once inside new user namespace, the uid is 0 (i.e root) which is mapped to host's uid. (--map-root-user does that.)
+- other namespaces (which usually need root / CAP_SYS_ADMIN) to be created, can be created from within the container's "root" user (inside the new user namespace) using the local-root's privileges. 
+- note: in our `unshare` syscall, if we create user namespace and other namespaces in the SAME call, the `unshare` would not need sudo.
+
+```
+// BFEORE:
+sudo unshare -upfm --mount-proc ./turtle "$@" 
+
+// AFTER:
+unshare --user --map-root-user -upfm --mount-proc ./turtle "$@" 
+
+```
+
+Check if everything is working:
+```
+// inside the container
+ls -la /proc    // see the ownership change from BEFORE/AFTER
+mount      // check procfs is mounted
+sleep 10000
+
+
+// on the host
+mount | grep "proc"    // check you can't see turtle's procfs mounted here
+ps aux | grep "sleep"    // check that "sleep 10000" belongs to non-root user which started the container
+
+```
+
 Links:
 - https://man7.org/linux/man-pages/man7/user_namespaces.7.html
 - https://man7.org/linux/man-pages/man1/unshare.1.html
 - https://raesene.github.io/blog/2016/02/04/Docker-User-Namespaces/
+- https://www.youtube.com/watch?v=nc5qOeF2dwY&list=LL&index=5
+- https://www.youtube.com/watch?v=-YnMr1lj4Z8&list=LL&index=7 (a really good one for overall understanding of the project!)
+- https://www.youtube.com/watch?v=lmig6_Y_dF4&list=LL&index=4
 
-
-https://man7.org/linux/man-pages/man2/fork.2.html - example at button on how to use it in c++
+When porting ushare command to c++ code, forking of the process is needed because new PID ns puts the children process in the new namespace. 
+https://man7.org/linux/man-pages/man2/fork.2.html - example of how to use it in c++ at bottom of the page
 
 #### step 6
 
