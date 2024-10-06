@@ -139,24 +139,55 @@ https://man7.org/linux/man-pages/man2/fork.2.html - example of how to use it in 
 
 control groups! 
 
-- create control group & set limits: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/managing_monitoring_and_updating_the_kernel/assembly_using-cgroupfs-to-manually-manage-cgroups_managing-monitoring-and-updating-the-kernel#proc_creating-cgroups-and-enabling-controllers-in-cgroups-v2-file-system_assembly_using-cgroupfs-to-manually-manage-cgroups
-- start a process in a control group https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/resource_management_guide/starting_a_process#Starting_a_Process
+- 
 
-cgroup limits in hierachy:
+two ways to create cgroups:
+1. with cgroup-fs (+ set limit to a process by writing the pid in `cgroup.procs`): https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/managing_monitoring_and_updating_the_kernel/assembly_using-cgroupfs-to-manually-manage-cgroups_managing-monitoring-and-updating-the-kernel#proc_creating-cgroups-and-enabling-controllers-in-cgroups-v2-file-system_assembly_using-cgroupfs-to-manually-manage-cgroups
+
+2. `cgcreate` command to create cgroup: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/resource_management_guide/sec-creating_cgroups#sec-Creating_Cgroups
+    - `cgexec` (start a process in a control group): https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/6/html/resource_management_guide/starting_a_process#Starting_a_Process
+ 
+
+Note: cgroup limits in hierachy. root control group > child cgroup > garndchild cgroup.
+
+1. Creating cgroup using cgroup-fs
 
 ```
 ls /sys/fs/cgroup             //root control cgroup
 
 mkdir /sys/fs/cgroup/test     // child cgroup
 cat /sys/fs/cgroup/test/cgroup.controllers  // see controllers of "test" cgroup - inherited by /sys/fs/cgroup/cgroup.subtree_control
+      
+sudo bash -c 'echo +cpu > /sys/fs/cgroup/test/cgroup.subtree_control' // limit the children of "test" group
+sudo bash -c 'echo +memory > /sys/fs/cgroup/test/cgroup.subtree_control'
 
-echo "+cpu +memory" >> /sys/fs/cgroup/test/cgroup.subtree_control      // limit the children of "test" group
 
-
-
-mkdir /sys/fs/cgroup/test/turtle    // child group of "test" cgroup - would only have files for "cpu" and "memory" controllers
-cat /sys/fs/cgroup/test/turtle/cgroup.controllers   //  verify controllers to be only "cpu" and "memory" from /sys/fs/cgroup/test/cgroup.subtree_control
-
+mkdir /sys/fs/cgroup/test/tasks    // child group of "test" cgroup - would only have files for "cpu" and "memory" controllers
+cat /sys/fs/cgroup/test/tasks/cgroup.controllers   //  verify controllers to be only "cpu" and "memory" from /sys/fs/cgroup/test/cgroup.subtree_control
 
 ```
 
+2. Limit resources for "test/tasks" cgroup:
+```
+sudo bash -c 'echo 50 > /sys/fs/cgroup/test/tasks/cpu.weight'
+sudo bash -c 'echo "500M" > /sys/fs/cgroup/test/tasks/memory.max'
+```
+
+3. Run script with cgroup
+```
+TURTLE_PID=$(echo $$)
+sudo bash -c "echo $TURTLE_PID > /sys/fs/cgroup/test/tasks/cgroup.procs"
+./turtle.sh
+```
+
+4. Verify that it works
+
+Doing this should fail the container:
+```
+sudo bash -c 'echo "0M" > /sys/fs/cgroup/test/tasks/memory.max'
+
+// start container, and inside it run:
+touch testfile
+echo "test test test!" > testfile
+```
+Meanwhile, running the container again with "400M" of memory should work!

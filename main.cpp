@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
         }
         exit(rt);
     } else {
-        // parent process - should wait for child to die
+        // parent process - should wait for child process to finish
         int status;
         waitpid(pid, &status, 0);
         int exit_code = WEXITSTATUS(status);
